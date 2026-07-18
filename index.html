@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Calculator — Ae productions</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#f5f3f0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Calculator">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" href="./icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f3f0;
+    --panel:#ffffff;
+    --navy:#2c3e50;
+    --navy-soft:#5b6b7a;
+    --crimson:#c41e3a;
+    --key:#e0fff2;
+    --key-hover:#c9f6e5;
+    --mint:#63e0cb;
+    --mint-hover:#4bd3bc;
+    --lemon:#fffb91;
+    --aqua:#00f2ff;
+    --aqua-hover:#00d6e2;
+    --fn:#e4e8ee;
+    --op:#dbe3ec;
+    --line:#e2e0dc;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;
+    user-select:none;
+    touch-action:manipulation;
+    background:var(--bg);
+    font-family:'RocknRoll One',sans-serif;
+    color:var(--navy);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px;
+    gap:18px;
+  }
+  .calc{
+    width:100%;
+    max-width:420px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:28px;
+    padding:22px;
+    box-shadow:0 10px 30px rgba(44,62,80,.08);
+  }
+
+  /* ---------- display ---------- */
+  .screen{
+    text-align:right;
+    padding:14px 10px 18px;
+    min-height:120px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    gap:6px;
+    overflow:hidden;
+  }
+  .expr{
+    font-size:20px;
+    color:var(--navy-soft);
+    min-height:26px;
+    word-break:break-all;
+    line-height:1.3;
+  }
+  .result{
+    font-size:44px;
+    line-height:1.1;
+    word-break:break-all;
+  }
+  .result.error{color:var(--crimson);font-size:26px}
+
+  /* ---------- memory bar ---------- */
+  .membar{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    padding:8px 4px 14px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:16px;
+  }
+  .mem{
+    flex:1;
+    border:none;
+    background:transparent;
+    color:var(--navy-soft);
+    font-family:inherit;
+    font-size:14px;
+    padding:8px 0;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s,color .15s;
+  }
+  .mem:hover{background:var(--key);color:var(--navy)}
+  .mem:disabled{opacity:.35;cursor:default}
+  .mem:disabled:hover{background:transparent;color:var(--navy-soft)}
+  .mem.ac{
+    flex:0 0 54px;
+    background:var(--mint);
+    color:var(--lemon);
+  }
+  .mem.ac:hover{background:var(--mint-hover);color:var(--lemon)}
+  .mflag{
+    width:26px;height:26px;flex:0 0 26px;
+    border-radius:50%;
+    display:grid;place-items:center;
+    font-size:13px;
+    color:var(--crimson);
+    background:rgba(196,30,58,.1);
+    visibility:hidden;
+  }
+  .mflag.on{visibility:visible}
+
+  /* ---------- pad ---------- */
+  .pad{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
+  .fnrow{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .brk{display:flex;gap:2px;align-items:baseline}
+  .brk span{opacity:.3;transition:opacity .15s,color .15s}
+  .brk span.active{opacity:1;color:var(--aqua)}
+  button.k{
+    aspect-ratio:1/1;
+    border:none;
+    border-radius:50%;
+    background:var(--key);
+    color:var(--navy);
+    font-family:inherit;
+    font-size:22px;
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    transition:background .12s,transform .06s;
+  }
+  button.k:hover{background:var(--key-hover)}
+  button.k:active{transform:scale(.94)}
+  button.k:focus-visible{outline:2px solid var(--crimson);outline-offset:2px}
+  .k.fn{background:var(--fn);font-size:19px;color:var(--navy-soft)}
+  .k.fn:hover{background:#d8dde5}
+  .k.op{background:var(--op);font-size:24px}
+  .k.op:hover{background:#cdd8e5}
+  .k.clear{background:var(--mint);color:var(--lemon)}
+  .k.clear:hover{background:var(--mint-hover)}
+  .k.eq{background:var(--aqua);color:var(--navy);font-size:26px}
+  .k.eq:hover{background:var(--aqua-hover)}
+
+  footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--navy-soft);
+    line-height:1.7;
+  }
+  footer .ae{color:var(--crimson)}
+
+  @media (max-width:420px){
+    .calc{padding:16px;border-radius:22px}
+    .result{font-size:36px}
+    .pad{gap:8px}
+    button.k{font-size:19px}
+    .k.fn{font-size:16px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<div class="calc">
+  <div class="screen">
+    <div class="expr" id="expr">&nbsp;</div>
+    <div class="result" id="result">0</div>
+  </div>
+
+  <div class="membar">
+    <span class="mflag" id="mflag">M</span>
+    <button class="mem" id="mc" data-mem="MC">MC</button>
+    <button class="mem" id="mr" data-mem="MR">MR</button>
+    <button class="mem" data-mem="M+">M+</button>
+    <button class="mem" data-mem="M-">M−</button>
+    <button class="mem" data-mem="MS">MS</button>
+    <button class="mem ac" data-act="ac">AC</button>
+  </div>
+
+  <div class="fnrow">
+    <button class="k fn" data-ins="√(">√</button>
+    <button class="k fn" data-ins="π">π</button>
+    <button class="k fn" data-ins="^2">x²</button>
+    <button class="k fn" data-act="neg">±</button>
+  </div>
+
+  <div class="pad">
+    <button class="k fn" data-act="brk" id="brkBtn" aria-label="Brackets"><span class="brk"><span id="brkOpen">(</span><span id="brkClose">)</span></span></button>
+    <button class="k fn" data-ins="^">^</button>
+    <button class="k fn" data-ins="%">%</button>
+    <button class="k op" data-ins="÷">÷</button>
+
+    <button class="k" data-ins="7">7</button>
+    <button class="k" data-ins="8">8</button>
+    <button class="k" data-ins="9">9</button>
+    <button class="k op" data-ins="×">×</button>
+
+    <button class="k" data-ins="4">4</button>
+    <button class="k" data-ins="5">5</button>
+    <button class="k" data-ins="6">6</button>
+    <button class="k op" data-ins="−">−</button>
+
+    <button class="k" data-ins="1">1</button>
+    <button class="k" data-ins="2">2</button>
+    <button class="k" data-ins="3">3</button>
+    <button class="k op" data-ins="+">+</button>
+
+    <button class="k" data-ins="0">0</button>
+    <button class="k" data-ins=".">.</button>
+    <button class="k clear" data-act="del" aria-label="Delete">⌫</button>
+    <button class="k eq" data-act="eq">=</button>
+  </div>
+</div>
+
+<footer>
+  <span class="ae">Ae productions</span><br>
+  Cygnus 42 Miranda ᚠ4311
+</footer>
+
+<script>
+(function(){
+  const exprEl = document.getElementById('expr');
+  const resEl  = document.getElementById('result');
+  const mflag  = document.getElementById('mflag');
+
+  let input = '';        // raw expression string
+  let memory = null;     // null = empty
+  let justEvaluated = false;
+
+  /* ---------- parser ---------- */
+  function tokenize(s){
+    const t=[]; let i=0;
+    while(i<s.length){
+      const c=s[i];
+      if(c===' '){i++;continue;}
+      if(/[0-9.]/.test(c)){
+        let n=''; while(i<s.length && /[0-9.]/.test(s[i])) n+=s[i++];
+        if((n.match(/\./g)||[]).length>1) throw new Error('Bad number');
+        t.push({t:'num',v:parseFloat(n)});
+        continue;
+      }
+      if('+−-×÷*/()%π√^'.includes(c)){ t.push({t:c}); i++; continue; }
+      throw new Error('Bad input');
+    }
+    return t;
+  }
+
+  function parse(tokens){
+    let p=0;
+    const peek=()=>tokens[p];
+    const eat=k=>{ if(tokens[p]&&tokens[p].t===k){p++;return true;} return false; };
+
+    function startsValue(tk){
+      return tk && (tk.t==='num'||tk.t==='('||tk.t==='π'||tk.t==='√');
+    }
+
+    function expr(){
+      let v=term();
+      while(peek()&&('+−-'.includes(peek().t))){
+        const op=tokens[p++].t;
+        const r=term();
+        v = (op==='+') ? v+r : v-r;
+      }
+      return v;
+    }
+    function term(){
+      let v=power();
+      for(;;){
+        const tk=peek();
+        if(tk&&('×*'.includes(tk.t))){ p++; v*=power(); }
+        else if(tk&&('÷/'.includes(tk.t))){ p++; const d=power(); v/=d; }
+        else if(startsValue(tk)){ v*=power(); }   // implicit multiply: 2π, 3(4)
+        else break;
+      }
+      return v;
+    }
+    function power(){
+      const base=unary();
+      if(eat('^')) return Math.pow(base, power());
+      return base;
+    }
+    function unary(){
+      if(peek()&&'−-'.includes(peek().t)){ p++; return -unary(); }
+      if(eat('√')){ const v=unary(); if(v<0) throw new Error('√ of negative'); return Math.sqrt(v); }
+      return postfix();
+    }
+    function postfix(){
+      let v=primary();
+      while(eat('%')) v=v/100;
+      if(eat('^')) v=Math.pow(v,power());
+      return v;
+    }
+    function primary(){
+      const tk=peek();
+      if(!tk) throw new Error('Incomplete');
+      if(tk.t==='num'){ p++; return tk.v; }
+      if(tk.t==='π'){ p++; return Math.PI; }
+      if(tk.t==='('){ p++; const v=expr(); if(!eat(')')) throw new Error('Missing )'); return v; }
+      throw new Error('Incomplete');
+    }
+
+    const val=expr();
+    if(p<tokens.length) throw new Error('Incomplete');
+    return val;
+  }
+
+  function balance(s){
+    let open=0;
+    for(const c of s){ if(c==='(') open++; else if(c===')') open--; }
+    return s + ')'.repeat(Math.max(0,open));
+  }
+
+  function evaluate(s){
+    if(!s.trim()) return null;
+    const v = parse(tokenize(balance(s)));
+    if(!isFinite(v)) throw new Error(isNaN(v)?'Undefined':'Cannot divide by zero');
+    return v;
+  }
+
+  function fmt(n){
+    if(n===null) return '0';
+    if(Number.isInteger(n) && Math.abs(n)<1e15) return String(n);
+    let s = Math.abs(n)>=1e12 || (Math.abs(n)<1e-6 && n!==0)
+      ? n.toExponential(8).replace(/\.?0+e/,'e')
+      : parseFloat(n.toPrecision(12)).toString();
+    return s;
+  }
+
+  function nextBracket(){
+    const s = justEvaluated ? '' : input;
+    let open=0;
+    for(const c of s){ if(c==='(') open++; else if(c===')') open--; }
+    const last = s.slice(-1);
+    if(!s || '+−×÷^('.includes(last)) return '(';
+    if(open>0) return ')';
+    return '(';
+  }
+
+  function updateBrackets(){
+    const nb = nextBracket();
+    document.getElementById('brkOpen').classList.toggle('active', nb==='(');
+    document.getElementById('brkClose').classList.toggle('active', nb===')');
+  }
+
+  /* ---------- render ---------- */
+  function render(preview=true){
+    updateBrackets();
+    exprEl.textContent = input || '\u00A0';
+    if(justEvaluated) return;
+    if(!input){ resEl.textContent='0'; resEl.classList.remove('error'); return; }
+    if(preview){
+      try{
+        const v=evaluate(input);
+        resEl.textContent = v===null?'0':fmt(v);
+        resEl.classList.remove('error');
+      }catch(e){ /* keep last preview while mid-typing */ }
+    }
+    mflag.classList.toggle('on', memory!==null);
+    document.getElementById('mc').disabled = memory===null;
+    document.getElementById('mr').disabled = memory===null;
+  }
+
+  /* ---------- actions ---------- */
+  function insert(txt){
+    if(justEvaluated){
+      // continue from result if an operator was pressed, else start fresh
+      if('+−×÷^%'.includes(txt[0])) input = resEl.textContent;
+      else input = '';
+      justEvaluated=false;
+      resEl.classList.remove('error');
+    }
+    input += txt;
+    render();
+  }
+
+  function del(){
+    if(justEvaluated){ justEvaluated=false; input=''; resEl.textContent='0'; render(); return; }
+    input = input.slice(0,-1);
+    if(!input) resEl.textContent='0';
+    render();
+  }
+
+  function ac(){
+    input=''; justEvaluated=false;
+    resEl.textContent='0'; resEl.classList.remove('error');
+    render();
+  }
+
+  function negate(){
+    if(justEvaluated){
+      const v=parseFloat(resEl.textContent);
+      if(!isNaN(v)){ input=fmt(-v); justEvaluated=false; render(); }
+      return;
+    }
+    // wrap the trailing number/group in −( … )
+    const m = input.match(/(√\()?(\d*\.?\d+|π)$/);
+    if(m){
+      const start = input.length - m[0].length;
+      input = input.slice(0,start) + '(−' + m[0] + ')';
+    } else {
+      input += '(−';
+    }
+    render();
+  }
+
+  function equals(){
+    if(!input) return;
+    try{
+      const v=evaluate(input);
+      input = balance(input);
+      exprEl.textContent = input + ' =';
+      resEl.textContent = fmt(v);
+      resEl.classList.remove('error');
+      justEvaluated = true;
+    }catch(e){
+      resEl.textContent = e.message;
+      resEl.classList.add('error');
+      justEvaluated = true;
+    }
+    updateBrackets();
+  }
+
+  function currentValue(){
+    try{ const v=evaluate(input); return v===null?parseFloat(resEl.textContent)||0:v; }
+    catch(e){ const v=parseFloat(resEl.textContent); return isNaN(v)?0:v; }
+  }
+
+  function memAction(a){
+    switch(a){
+      case 'MS': memory = currentValue(); justEvaluated=true; break;
+      case 'MC': memory = null; break;
+      case 'MR':
+        if(memory===null) return;
+        if(justEvaluated){ input=''; justEvaluated=false; }
+        input += fmt(memory);
+        break;
+      case 'M+': memory = (memory||0) + currentValue(); justEvaluated=true; break;
+      case 'M-': memory = (memory||0) - currentValue(); justEvaluated=true; break;
+    }
+    render();
+  }
+
+  /* ---------- wiring ---------- */
+  document.querySelectorAll('.pad .k, .fnrow .k').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(b.dataset.ins!==undefined) return insert(b.dataset.ins);
+      const a=b.dataset.act;
+      if(a==='del') del();
+      else if(a==='brk') insert(nextBracket());
+      else if(a==='neg') negate();
+      else if(a==='eq') equals();
+    });
+  });
+  document.querySelectorAll('.mem').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(b.dataset.act==='ac') return ac();
+      memAction(b.dataset.mem);
+    });
+  });
+
+  const keymap={'*':'×','/':'÷','-':'−','x':'×'};
+  window.addEventListener('keydown',e=>{
+    const k=e.key;
+    if(/^[0-9.]$/.test(k)) return insert(k);
+    if('+-*/x^%()'.includes(k) && k.length===1) return insert(keymap[k]||k);
+    if(k==='Enter'||k==='='){ e.preventDefault(); return equals(); }
+    if(k==='Backspace'){ e.preventDefault(); return del(); }
+    if(k==='Escape'){ return ac(); }
+    if(k==='p'){ return insert('π'); }
+    if(k==='r'){ return insert('√('); }
+  });
+
+  render();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
