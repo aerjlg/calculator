@@ -14,7 +14,7 @@
 <link rel="icon" href="./icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Finger+Paint&family=RocknRoll+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Finger+Paint&family=Noto+Sans+Runic&family=RocknRoll+One&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#000000;
@@ -58,8 +58,8 @@
   .calc{margin-top:auto}
   footer{margin-bottom:auto}
   .calc{
-    width:100%;
-    max-width:420px;
+    width:fit-content;
+    max-width:100%;
     background:var(--panel);
     border:1px solid var(--line);
     border-radius:28px;
@@ -70,8 +70,8 @@
   /* ---------- display ---------- */
   .screen{
     text-align:right;
-    padding:14px 10px 18px;
-    min-height:120px;
+    padding:6px 8px 10px;
+    min-height:0;
     display:flex;
     flex-direction:column;
     justify-content:flex-end;
@@ -79,14 +79,14 @@
     overflow:hidden;
   }
   .expr{
-    font-size:20px;
+    font-size:clamp(15px,2.4vh,19px);
     color:var(--navy-soft);
     min-height:26px;
     word-break:break-all;
     line-height:1.3;
   }
   .result{
-    font-size:44px;
+    font-size:clamp(30px,6.5vh,42px);
     line-height:1.1;
     word-break:break-all;
   }
@@ -97,9 +97,9 @@
     display:flex;
     gap:8px;
     align-items:center;
-    padding:8px 4px 14px;
+    padding:2px 4px 8px;
     border-bottom:1px solid var(--line);
-    margin-bottom:16px;
+    margin-bottom:10px;
   }
   .mem{
     flex:1;
@@ -134,20 +134,17 @@
   .mflag.on{visibility:visible}
 
   /* ---------- pad ---------- */
-  .pad{
+  .calc{--btn:clamp(48px,min(18vw,7.6vh),86px)}
+  .pad,.fnrow{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(4,var(--btn));
+    justify-content:center;
     gap:10px;
   }
-  .fnrow{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-    margin-bottom:10px;
-  }
+  .fnrow{margin-bottom:10px}
   .brk{display:flex;gap:2px;align-items:baseline}
   .brk span{opacity:.3;transition:opacity .15s,color .15s}
-  .brk span.active{opacity:1;color:var(--aqua)}
+  .brk span.active{opacity:1;color:#000}
   button.k{
     aspect-ratio:1/1;
     border:none;
@@ -169,6 +166,8 @@
   .k.op{background:var(--op);font-size:30px}
   .k.op:hover{background:#cdd8e5}
   .k.clear{background:var(--mint);color:var(--lemon)}
+  .k.del{color:#000}
+  .k.del svg{width:46%;height:auto;display:block}
   .k.clear:hover{background:var(--mint-hover)}
   .k.eq{background:var(--aqua);color:var(--navy);font-size:32px}
   .k.eq:hover{background:var(--aqua-hover)}
@@ -178,7 +177,7 @@
     line-height:1.9;
   }
   footer .ae{
-    font-family:'Finger Paint',cursive;
+    font-family:'Noto Sans Runic','Finger Paint',cursive;
     color:var(--teal);
     font-size:17px;
     letter-spacing:.5px;
@@ -216,19 +215,12 @@
     .k.eq{font-size:29px}
   }
   @media (max-height:760px){
-    body{gap:12px;padding-top:calc(env(safe-area-inset-top) + 16px)}
-    .screen{min-height:92px;padding:8px 8px 12px}
-    .result{font-size:34px}
-    .expr{font-size:17px}
-    .membar{padding:6px 4px 10px;margin-bottom:12px}
+    body{gap:10px}
+    .membar{padding:0 4px 6px;margin-bottom:8px}
     .pad,.fnrow{gap:8px}
     .fnrow{margin-bottom:8px}
-    footer{line-height:1.6}
-  }
-  @media (max-height:640px){
-    .screen{min-height:72px}
-    .result{font-size:29px}
-    .calc{padding:14px;border-radius:22px}
+    .calc{padding:14px}
+    footer{line-height:1.5}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -284,13 +276,13 @@
 
     <button class="k" data-ins="0">0</button>
     <button class="k" data-ins=".">.</button>
-    <button class="k clear" data-act="del" aria-label="Delete">⌫</button>
+    <button class="k clear del" data-act="del" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 4.5h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-11L1.5 12z"/><path d="M12.5 9.5l6 5M18.5 9.5l-6 5"/></svg></button>
     <button class="k eq" data-act="eq">=</button>
   </div>
 </div>
 
 <footer>
-  <span class="ae">Ae productions</span><br>
+  <span class="ae">ᛗᛞ᛬ᛗ᛫ᛯᛖ</span><br>
   <span class="atlas">Cygnus 42 Miranda ᚠ4311</span><br>
   <button class="haptic-toggle" id="haptic" aria-pressed="true">Vibration: on</button>
 </footer>

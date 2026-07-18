@@ -1,5 +1,5 @@
 /* Calculator — Ae productions : cache-first service worker */
-const CACHE = 'calc-v5';
+const CACHE = 'calc-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,7 @@ const ASSETS = [
   './icon-512.png',
   './icon-maskable-512.png',
   './apple-touch-icon.png',
-  'https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap'
+  'https://fonts.googleapis.com/css2?family=Finger+Paint&family=Noto+Sans+Runic&family=RocknRoll+One&display=swap'
 ];
 
 self.addEventListener('install', e => {
