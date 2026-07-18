@@ -46,10 +46,17 @@
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
-    padding:24px 16px;
-    gap:18px;
+    min-height:100dvh;
+    overflow-y:auto;
+    gap:16px;
+    padding:
+      calc(env(safe-area-inset-top) + 22px)
+      16px
+      calc(env(safe-area-inset-bottom) + 22px);
   }
+  /* centres vertically when there is room, never clips when there isn't */
+  .calc{margin-top:auto}
+  footer{margin-bottom:auto}
   .calc{
     width:100%;
     max-width:420px;
@@ -208,6 +215,22 @@
     .k.op{font-size:27px}
     .k.eq{font-size:29px}
   }
+  @media (max-height:760px){
+    body{gap:12px;padding-top:calc(env(safe-area-inset-top) + 16px)}
+    .screen{min-height:92px;padding:8px 8px 12px}
+    .result{font-size:34px}
+    .expr{font-size:17px}
+    .membar{padding:6px 4px 10px;margin-bottom:12px}
+    .pad,.fnrow{gap:8px}
+    .fnrow{margin-bottom:8px}
+    footer{line-height:1.6}
+  }
+  @media (max-height:640px){
+    .screen{min-height:72px}
+    .result{font-size:29px}
+    .calc{padding:14px;border-radius:22px}
+  }
+
   @media (prefers-reduced-motion:reduce){
     *{transition:none!important}
   }
