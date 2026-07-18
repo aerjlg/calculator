@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Calculator — Ae productions</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#f5f3f0">
+<meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -14,10 +14,11 @@
 <link rel="icon" href="./icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Finger+Paint&family=RocknRoll+One&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f5f3f0;
+    --bg:#000000;
+    --teal:#00b3a6;
     --panel:#ffffff;
     --navy:#2c3e50;
     --navy-soft:#5b6b7a;
@@ -56,7 +57,7 @@
     border:1px solid var(--line);
     border-radius:28px;
     padding:22px;
-    box-shadow:0 10px 30px rgba(44,62,80,.08);
+    box-shadow:0 10px 40px rgba(0,0,0,.6);
   }
 
   /* ---------- display ---------- */
@@ -147,7 +148,7 @@
     background:var(--key);
     color:var(--navy);
     font-family:inherit;
-    font-size:22px;
+    font-size:28px;
     cursor:pointer;
     display:grid;
     place-items:center;
@@ -156,29 +157,56 @@
   button.k:hover{background:var(--key-hover)}
   button.k:active{transform:scale(.94)}
   button.k:focus-visible{outline:2px solid var(--crimson);outline-offset:2px}
-  .k.fn{background:var(--fn);font-size:19px;color:var(--navy-soft)}
+  .k.fn{background:var(--fn);font-size:25px;color:var(--navy-soft)}
   .k.fn:hover{background:#d8dde5}
-  .k.op{background:var(--op);font-size:24px}
+  .k.op{background:var(--op);font-size:30px}
   .k.op:hover{background:#cdd8e5}
   .k.clear{background:var(--mint);color:var(--lemon)}
   .k.clear:hover{background:var(--mint-hover)}
-  .k.eq{background:var(--aqua);color:var(--navy);font-size:26px}
+  .k.eq{background:var(--aqua);color:var(--navy);font-size:32px}
   .k.eq:hover{background:var(--aqua-hover)}
 
   footer{
     text-align:center;
-    font-size:13px;
-    color:var(--navy-soft);
-    line-height:1.7;
+    line-height:1.9;
   }
-  footer .ae{color:var(--crimson)}
+  footer .ae{
+    font-family:'Finger Paint',cursive;
+    color:var(--teal);
+    font-size:17px;
+    letter-spacing:.5px;
+  }
+  footer .atlas{
+    font-size:13px;
+    color:var(--mint);
+  }
+  .haptic-toggle{
+    margin-top:8px;
+    border:1px solid rgba(255,255,255,.28);
+    background:transparent;
+    color:rgba(255,255,255,.72);
+    font-family:inherit;
+    font-size:12px;
+    padding:5px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .haptic-toggle:hover{background:rgba(255,255,255,.1)}
+  .haptic-toggle[aria-pressed="true"]{
+    border-color:var(--mint);
+    background:rgba(99,224,203,.15);
+    color:var(--mint);
+  }
 
   @media (max-width:420px){
     .calc{padding:16px;border-radius:22px}
     .result{font-size:36px}
     .pad{gap:8px}
-    button.k{font-size:19px}
-    .k.fn{font-size:16px}
+    button.k{font-size:25px}
+    .k.fn{font-size:22px}
+    .k.op{font-size:27px}
+    .k.eq{font-size:29px}
   }
   @media (prefers-reduced-motion:reduce){
     *{transition:none!important}
@@ -240,7 +268,8 @@
 
 <footer>
   <span class="ae">Ae productions</span><br>
-  Cygnus 42 Miranda ᚠ4311
+  <span class="atlas">Cygnus 42 Miranda ᚠ4311</span><br>
+  <button class="haptic-toggle" id="haptic" aria-pressed="true">Vibration: on</button>
 </footer>
 
 <script>
@@ -442,6 +471,7 @@
       resEl.textContent = e.message;
       resEl.classList.add('error');
       justEvaluated = true;
+      buzz([14,60,14]);
     }
     updateBrackets();
   }
@@ -466,9 +496,37 @@
     render();
   }
 
+  /* ---------- haptics ---------- */
+  const canVibrate = 'vibrate' in navigator;
+  let haptics = true;
+  try{ haptics = localStorage.getItem('calcHaptics') !== 'off'; }catch(e){}
+
+  const hapticBtn = document.getElementById('haptic');
+  function paintHaptic(){
+    if(!hapticBtn) return;
+    hapticBtn.setAttribute('aria-pressed', String(haptics));
+    hapticBtn.textContent = canVibrate
+      ? ('Vibration: ' + (haptics ? 'on' : 'off'))
+      : 'Vibration unavailable';
+    hapticBtn.disabled = !canVibrate;
+    if(!canVibrate) hapticBtn.style.opacity = '.5';
+  }
+  function buzz(ms){
+    if(!haptics || !canVibrate) return;
+    try{ navigator.vibrate(ms); }catch(e){}
+  }
+  if(hapticBtn) hapticBtn.addEventListener('click',()=>{
+    haptics = !haptics;
+    try{ localStorage.setItem('calcHaptics', haptics ? 'on' : 'off'); }catch(e){}
+    paintHaptic();
+    buzz(12);
+  });
+  paintHaptic();
+
   /* ---------- wiring ---------- */
   document.querySelectorAll('.pad .k, .fnrow .k').forEach(b=>{
     b.addEventListener('click',()=>{
+      buzz(b.dataset.act==='eq' ? 22 : 10);
       if(b.dataset.ins!==undefined) return insert(b.dataset.ins);
       const a=b.dataset.act;
       if(a==='del') del();
@@ -479,6 +537,7 @@
   });
   document.querySelectorAll('.mem').forEach(b=>{
     b.addEventListener('click',()=>{
+      buzz(b.dataset.act==='ac' ? 22 : 10);
       if(b.dataset.act==='ac') return ac();
       memAction(b.dataset.mem);
     });
