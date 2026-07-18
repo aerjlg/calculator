@@ -1,5 +1,5 @@
 /* Calculator — Ae productions : cache-first service worker */
-const CACHE = 'calc-v9';
+const CACHE = 'calc-v10';
 const ASSETS = [
   './',
   './index.html',
